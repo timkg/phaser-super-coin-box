@@ -76,6 +76,26 @@ var mainState = {
     this.coin.kill();
     this.score += 5;
     this.scoreLabel.text = 'score: ' + this.score;
+    this.updateCoinPosition();
+  },
+
+  updateCoinPosition: function() {
+    var coinPosition = [
+      {x: 140, y: 60}, {x: 360, y: 60}, // Top row
+      {x: 60, y: 140}, {x: 440, y: 140}, // Middle row
+      {x: 130, y: 300}, {x: 370, y: 300} // Bottom row
+    ];
+
+    // Remove the current coin position from the array for the remaining of this function
+    // The positions are set again at the start of the method, this only guarantees picking a new position
+    for (var i = 0; i < coinPosition.length; i++) {
+      if (coinPosition[i].x === this.coin.x) {
+         coinPosition.splice(i, 1);
+      }
+    }
+
+    var newPosition = coinPosition[ game.rnd.integerInRange(0, coinPosition.length-1)];
+    this.coin.reset(newPosition.x, newPosition.y);
   },
 
   end: function () {
