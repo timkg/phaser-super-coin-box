@@ -38,12 +38,14 @@ var mainState = {
     this.createWalls();
 
     this.cursor = game.input.keyboard.createCursorKeys();
-
   },
 
   update: function () {
     game.physics.arcade.collide(this.player, this.walls);
     this.movePlayer();
+    if (!this.player.inWorld) {
+      this.end();
+    }
   },
 
   movePlayer: function () {
@@ -58,8 +60,10 @@ var mainState = {
     if (this.cursor.up.isDown && this.player.body.touching.down) {
       this.player.body.velocity.y = -320;
     }
+  },
 
-
+  end: function () {
+    game.state.start('main');
   }
 };
 
