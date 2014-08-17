@@ -3,6 +3,7 @@ var mainState = {
     game.load.image('player', 'assets/player.png');
     game.load.image('wallV',  'assets/wallVertical.png');
     game.load.image('wallH',  'assets/wallHorizontal.png');
+    game.load.image('coin',   'assets/coin.png');
   },
 
   createWalls: function () {
@@ -37,11 +38,20 @@ var mainState = {
 
     this.createWalls();
 
+    this.coin = game.add.sprite(60, 140, 'coin');
+    game.physics.arcade.enable(this.coin);
+    this.coin.anchor.setTo(.5,.5);
+
     this.cursor = game.input.keyboard.createCursorKeys();
+
+    this.scoreLabel = game.add.text(30, 30, 'score: 0', {font: '18ox Arial', fill: '#ffffff'});
+    this.score = 0;
   },
 
   update: function () {
     game.physics.arcade.collide(this.player, this.walls);
+    game.physics.arcade.overlap(this.player, this.coin, this.takeCoin, null, this);
+
     this.movePlayer();
     if (!this.player.inWorld) {
       this.end();
@@ -60,6 +70,12 @@ var mainState = {
     if (this.cursor.up.isDown && this.player.body.touching.down) {
       this.player.body.velocity.y = -320;
     }
+  },
+
+  takeCoin: function () {
+    this.coin.kill();
+    this.score += 5;
+    this.scoreLabel.text = 'score: ' + this.score;
   },
 
   end: function () {
