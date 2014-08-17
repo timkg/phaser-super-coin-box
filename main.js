@@ -4,6 +4,29 @@ var mainState = {
     game.load.image('wallV',  'assets/wallVertical.png');
     game.load.image('wallH',  'assets/wallHorizontal.png');
     game.load.image('coin',   'assets/coin.png');
+    game.load.image('enemy',  'assets/enemy.png');
+  },
+
+  create: function () {
+    game.stage.backgroundColor = '#3498db';
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    this.player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+    this.player.anchor.setTo(.5, .5);
+    game.physics.arcade.enable(this.player);
+    this.player.body.gravity.y = 500;
+
+    this.createWalls();
+    this.createEnemies();
+
+    this.coin = game.add.sprite(60, 140, 'coin');
+    game.physics.arcade.enable(this.coin);
+    this.coin.anchor.setTo(.5,.5);
+
+    this.cursor = game.input.keyboard.createCursorKeys();
+
+    this.scoreLabel = game.add.text(30, 30, 'score: 0', {font: '18ox Arial', fill: '#ffffff'});
+    this.score = 0;
   },
 
   createWalls: function () {
@@ -27,34 +50,40 @@ var mainState = {
     this.walls.setAll('body.immovable', true);
   },
 
-  create: function () {
-    game.stage.backgroundColor = '#3498db';
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+  createEnemies: function () {
+    this.enemies = game.add.group();
+    this.enemies.enableBody = true;
 
-    this.player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-    this.player.anchor.setTo(.5, .5);
-    game.physics.arcade.enable(this.player);
-    this.player.body.gravity.y = 500;
+    this.enemies.createMultiple(10, 'enemy'); // creates 10 'enemy' sprites in a 'dead' state
+    game.time.events.loop(2200, this.addEnemy, this); // add enemy every 2.2 seconds
+  },
 
-    this.createWalls();
+  addEnemy: function () {
+    var enemy = this.enemies.getFirstDead(); // get the first dead enemy from the group
 
-    this.coin = game.add.sprite(60, 140, 'coin');
-    game.physics.arcade.enable(this.coin);
-    this.coin.anchor.setTo(.5,.5);
+    if (!enemy) {
+      return;
+    }
 
-    this.cursor = game.input.keyboard.createCursorKeys();
+    enemy.anchor.setTo(.5, 1);
+    enemy.reset(game.world.centerX, 0);
+    enemy.body.gravity.y = 500;
+    enemy.body.velocity.x = 100 * Phaser.Math.randomSign();
+    enemy.body.bounce.x = 1;
+    enemy.checkWorldBounds = true;
+    enemy.outOfBoundsKill = true;
 
-    this.scoreLabel = game.add.text(30, 30, 'score: 0', {font: '18ox Arial', fill: '#ffffff'});
-    this.score = 0;
   },
 
   update: function () {
     game.physics.arcade.collide(this.player, this.walls);
+    game.physics.arcade.collide(this.enemies, this.walls);
     game.physics.arcade.overlap(this.player, this.coin, this.takeCoin, null, this);
+    game.physics.arcade.overlap(this.player, this.enemies, this.killPlayer, null, this);
 
     this.movePlayer();
     if (!this.player.inWorld) {
-      this.end();
+      this.killPlayer();
     }
   },
 
@@ -98,7 +127,7 @@ var mainState = {
     this.coin.reset(newPosition.x, newPosition.y);
   },
 
-  end: function () {
+  killPlayer: function () {
     game.state.start('main');
   }
 };
