@@ -1,15 +1,6 @@
-var mainState = {
-  preload: function () {
-    game.load.image('player', 'assets/player.png');
-    game.load.image('wallV',  'assets/wallVertical.png');
-    game.load.image('wallH',  'assets/wallHorizontal.png');
-    game.load.image('coin',   'assets/coin.png');
-    game.load.image('enemy',  'assets/enemy.png');
-  },
-
+var playState = {
   create: function () {
-    game.stage.backgroundColor = '#3498db';
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    this.cursor = game.input.keyboard.createCursorKeys();
 
     this.player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
     this.player.anchor.setTo(.5, .5);
@@ -23,10 +14,9 @@ var mainState = {
     game.physics.arcade.enable(this.coin);
     this.coin.anchor.setTo(.5,.5);
 
-    this.cursor = game.input.keyboard.createCursorKeys();
-
-    this.scoreLabel = game.add.text(30, 30, 'score: 0', {font: '18ox Arial', fill: '#ffffff'});
-    this.score = 0;
+    this.scoreLabel = game.add.text(30, 30, 'score: 0', {
+      font: '18ox Arial', fill: '#ffffff'});
+    game.global.score = 0;
   },
 
   createWalls: function () {
@@ -103,8 +93,8 @@ var mainState = {
 
   takeCoin: function () {
     this.coin.kill();
-    this.score += 5;
-    this.scoreLabel.text = 'score: ' + this.score;
+    game.global.score += 5;
+    this.scoreLabel.text = 'score: ' + game.global.score;
     this.updateCoinPosition();
   },
 
@@ -119,7 +109,7 @@ var mainState = {
     // The positions are set again at the start of the method, this only guarantees picking a new position
     for (var i = 0; i < coinPosition.length; i++) {
       if (coinPosition[i].x === this.coin.x) {
-         coinPosition.splice(i, 1);
+        coinPosition.splice(i, 1);
       }
     }
 
@@ -128,10 +118,6 @@ var mainState = {
   },
 
   killPlayer: function () {
-    game.state.start('main');
+    game.state.start('menu');
   }
 };
-
-var game = new Phaser.Game(500, 340, Phaser.AUTO, 'gameContainer');
-game.state.add('main', mainState);
-game.state.start('main');
